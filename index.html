@@ -1,0 +1,130 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ART QUEST — Polished Chromebook RPG</title><style>
+*{box-sizing:border-box}html,body{margin:0;background:#07111d;color:#fff;font-family:system-ui,"Noto Sans KR",sans-serif}body{min-width:900px}
+#app{width:min(1366px,100%);margin:auto}.screen{display:none}.screen.on{display:block}.top{height:60px;background:#09172a;border-bottom:2px solid #d3a653;display:flex;align-items:center;justify-content:space-between;padding:0 18px}.logo{font:900 27px Georgia;color:#f1c76e}.hud{display:flex;gap:13px;align-items:center;font-weight:800}.xpbar{width:135px;height:11px;background:#29374a;border-radius:10px;overflow:hidden}.xpbar i{display:block;height:100%;background:#efbd50}
+.game{position:relative;width:100%;aspect-ratio:1366/708;overflow:hidden;background:#19324a}.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.shade{position:absolute;inset:0;background:linear-gradient(#0001,#0000 70%,#0004);pointer-events:none}
+.player{position:absolute;width:112px;height:144px;object-fit:contain;z-index:12;transform:translate(-50%,-78%);filter:drop-shadow(0 5px 3px #0008)}.npc{position:absolute;width:126px;height:164px;object-fit:contain;z-index:9;transform:translate(-50%,-78%);filter:drop-shadow(0 5px 3px #0008)}
+.obj{position:absolute;object-fit:contain;z-index:8;transform:translate(-50%,-65%);filter:drop-shadow(0 5px 3px #0007)}.quest{position:absolute;z-index:10;width:46px;transform:translate(-50%,-50%);animation:bob .8s infinite alternate}@keyframes bob{to{margin-top:-8px}}
+.tag{position:absolute;z-index:11;background:#f2d9a1;color:#2d1d0c;border:2px solid #76501d;border-radius:7px;padding:4px 9px;font-weight:900;transform:translate(-50%,-50%);white-space:nowrap}.prompt{position:absolute;z-index:25;bottom:16px;left:50%;transform:translateX(-50%);background:#071527ef;border:2px solid #e1b657;border-radius:10px;padding:10px 18px;font-weight:900;display:none}
+.controls{height:58px;background:#081525;padding:9px 18px;display:flex;align-items:center;justify-content:space-between;color:#cad5e4}.controls button{min-height:36px;padding:5px 11px}button,input{font:inherit}button{cursor:pointer;min-height:46px;border:1px solid #667995;border-radius:9px;background:#142943;color:#fff;padding:10px 16px;font-weight:800}button:hover,button:focus{outline:3px solid #ffda74}.gold{background:linear-gradient(#f2ce79,#bb7c20);color:#241600;border:0}
+.panel{background:#0a192bee;border:2px solid #bd9147;border-radius:14px;padding:18px;box-shadow:0 8px 28px #0008}.center{position:absolute;z-index:30;left:50%;top:50%;transform:translate(-50%,-50%);width:660px;text-align:center}.title{font:900 68px Georgia;color:#f1c76e;text-shadow:0 4px #513715}.pickrow{display:flex;justify-content:center;gap:25px}.pick{width:230px;height:300px}.pick img{height:255px;max-width:100%;object-fit:contain}.pick.sel{outline:5px solid #ffda70}input{width:350px;padding:12px;font-size:18px;border-radius:9px;background:#081425;color:white;border:2px solid #667995}
+.dialog{position:absolute;z-index:35;left:4%;right:4%;bottom:3%;min-height:155px;background:#f1dfb8;color:#281d0e;border:4px solid #78521d;border-radius:13px;padding:18px 180px 18px 24px;font-size:19px;line-height:1.55}.dialog b{color:#704812}.dialog button{position:absolute;right:20px;bottom:20px}.mission{position:absolute;z-index:40;left:50%;top:50%;transform:translate(-50%,-50%);width:780px;max-height:92%;overflow:auto}.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.opts button{background:#fff8e8;color:#271c0d;border-color:#8a6734}.opts .sel{background:#dfbd65}.toast{position:absolute;z-index:60;left:50%;top:14px;transform:translateX(-50%);background:#071525ee;border:2px solid #e2b757;border-radius:10px;padding:12px 18px;font-weight:900}.reward{text-align:center}.reward img{height:190px}.spark{animation:pop .6s}@keyframes pop{0%{transform:scale(.4);opacity:0}80%{transform:scale(1.2)}}.puzzle{display:grid;grid-template-columns:repeat(3,125px);grid-template-rows:repeat(3,150px);gap:3px;justify-content:center}.tile{padding:0;min-height:0;background-image:url("assets/mona.webp");background-size:300% 300%;border:2px solid #b59052}.tile.good{outline:3px solid #70d57a}.mapNode{position:absolute;z-index:7;transform:translate(-50%,-50%);min-width:155px;text-align:center;
+background:linear-gradient(#f7e6b8,#d7aa59);color:#291b0b;border:3px solid #74501f;border-radius:12px;
+padding:10px 13px;font-weight:950;box-shadow:0 7px 14px #0008,inset 0 0 0 2px #fff4c777;text-shadow:0 1px #fff6}
+.mapNode::before{content:"✦";margin-right:6px;color:#8b5419}.mapNode.locked::before{content:"🔒";margin-right:5px}.locked{filter:grayscale(1);opacity:.55}
+#title::before{content:"";position:absolute;inset:0;background:url("assets/opening_title.jpg") center/cover no-repeat;z-index:0}
+#title>*{position:relative;z-index:1}
+</style><style>
+#title{background:#142033;overflow:hidden}
+#title::before{content:"";position:absolute;inset:0;background:url("assets/opening_title.jpg") center/cover no-repeat;z-index:0}
+#title>*{position:relative;z-index:1}
+#title .card{background:rgba(10,22,35,.76);backdrop-filter:blur(2px);max-width:460px}
+.player{width:116px!important;height:148px!important;object-fit:contain!important}
+.chooseCard img{height:285px!important;max-width:260px;object-fit:contain}
+</style>
+<style>
+#title{position:relative;background:#172131!important;overflow:hidden}
+#title::before{content:"";position:absolute;inset:0;background:
+linear-gradient(90deg,rgba(8,18,28,.05),rgba(8,18,28,.38)),
+url("assets/main_title.jpg") center/cover no-repeat!important;z-index:0}
+#title>*{position:relative;z-index:2}
+#title .card{background:rgba(9,20,32,.82)!important;backdrop-filter:blur(2px);border:2px solid #c89b47}
+#choose .chooseCard{max-width:500px}
+#nick{font-size:20px!important;padding:13px!important;text-align:center}
+#go{font-size:20px!important;padding:13px 22px!important;cursor:pointer}
+</style>
+<style id="large-character-patch">
+.player{width:174px!important;height:222px!important;object-fit:contain!important;
+transform:translate(-50%,-82%)!important;transform-origin:center bottom!important;
+filter:drop-shadow(0 8px 7px rgba(0,0,0,.35))}
+.npc{width:189px!important;height:246px!important;object-fit:contain!important;
+transform:translate(-50%,-86%)!important;transform-origin:center bottom!important;
+filter:drop-shadow(0 8px 7px rgba(0,0,0,.32))}
+</style></head><body><div id="app">
+<section id="title" class="screen on"><div class="game"><img class="bg" src="assets/main_title.jpg"><div class="shade"></div><div class="center panel"><div class="title">ART QUEST</div><h2>예술의 세계로 떠나는 여행</h2><p>캐릭터를 직접 움직여 시대를 탐험하고 잃어버린 명화를 되찾으세요.</p><button id="start" class="gold">▶ 게임 시작</button></div></div></section>
+<section id="choose" class="screen">
+      <div class="card chooseCard">
+        <h2>ART HUNTER 등록</h2>
+        <p>서양미술사의 시간 여행을 떠날 탐험가입니다.</p>
+        <img src="assets/m_down1.png" alt="ART HUNTER 탐험가" style="height:270px;object-fit:contain;filter:drop-shadow(0 10px 12px #0007)">
+        <input id="nick" maxlength="10" placeholder="탐험가 닉네임">
+        <button id="go">탐험 시작</button>
+      </div>
+    </section>
+<section id="play" class="screen"><div class="top"><div class="logo">ART QUEST</div><div class="hud"><span id="pn"></span><span id="hp">❤️❤️❤️</span><span>LV.<b id="lv">1</b></span><div class="xpbar"><i id="bar"></i></div><span><b id="xp">0</b>/100</span><span>🎒 <b id="bag">0</b>/5</span><button id="musicBtn" style="min-height:32px;padding:4px 9px">🎵 BGM</button></div></div><div id="game" class="game"><img id="bg" class="bg"><div class="shade"></div><div id="layer"></div><img id="hero" class="player" src="assets/m_down1.png"><div id="prompt" class="prompt">SPACE · 상호작용</div></div><div class="controls"><span>WASD / 방향키를 누르고 있으면 연속 이동 · SPACE 대화/입장</span><div><button data-k="ArrowLeft">←</button><button data-k="ArrowUp">↑</button><button data-k="ArrowDown">↓</button><button data-k="ArrowRight">→</button><button data-k=" ">SPACE</button></div></div></section>
+<section id="end" class="screen"><div class="game"><img class="bg" src="assets/bg_modern.jpg"><div class="center panel reward"><h1>🏆 ART MASTER</h1><div class="title" style="font-size:48px">CLEAR!</div><p id="final"></p><button id="restart" class="gold">처음부터</button></div></div></section></div>
+<script>
+(()=>{const $=q=>document.querySelector(q),$$=q=>[...document.querySelectorAll(q)];let g="m",nick="",xp=0,hp=3,items=[],cleared=0,scene="world",pos={x:14,y:74},near=null,dir="down",frame=0,walkT;
+
+const AudioCtx=window.AudioContext||window.webkitAudioContext;
+let ac=null,bgmOn=true,bgmTimer=null,bgmStep=0;
+const melody=[0,4,7,11,7,4,2,5,9,12,9,5,0,4,7,9];
+const bass=[0,0,5,5,9,9,7,7];
+function tone(freq,start,dur,vol,type="sine"){
+  if(!ac)return;let o=ac.createOscillator(),gain=ac.createGain();
+  o.type=type;o.frequency.value=freq;gain.gain.setValueAtTime(0,start);
+  gain.gain.linearRampToValueAtTime(vol,start+.04);
+  gain.gain.exponentialRampToValueAtTime(.0001,start+dur);
+  o.connect(gain).connect(ac.destination);o.start(start);o.stop(start+dur+.05)
+}
+function musicTick(){
+  if(!ac||!bgmOn)return;
+  let now=ac.currentTime+.05, root=220, m=melody[bgmStep%melody.length], b=bass[Math.floor(bgmStep/2)%bass.length];
+  tone(root*Math.pow(2,m/12),now,.75,.028,"sine");
+  if(bgmStep%2===0)tone(110*Math.pow(2,b/12),now,1.45,.018,"triangle");
+  if(bgmStep%4===0)tone(root*Math.pow(2,(m+7)/12),now,.9,.010,"sine");
+  bgmStep++;bgmTimer=setTimeout(musicTick,520)
+}
+function startMusic(){
+  if(!AudioCtx)return;
+  if(!ac)ac=new AudioCtx();
+  if(ac.state==="suspended")ac.resume();
+  clearTimeout(bgmTimer);if(bgmOn)musicTick()
+}
+function toggleMusic(){
+  bgmOn=!bgmOn;$("#musicBtn").textContent=bgmOn?"🎵 BGM":"🔇 BGM";
+  if(bgmOn)startMusic();else clearTimeout(bgmTimer)
+}
+$("#musicBtn").addEventListener("click",toggleMusic);
+
+const st=[["egypt","고대 이집트",20,64,"이집트 장인","npc_egypt",62,49,"🏺 황금 스카라베"],["renaissance","르네상스",39,43,"레오나르도 다빈치","npc_leo",62,50,"📜 다빈치 스케치북"],["baroque","바로크·로코코",58,38,"바로크 귀족","npc_baroque",62,49,"💎 빛의 보석"],["impression","인상주의",70,61,"클로드 모네","npc_monet",62,51,"🎨 빛의 팔레트"],["modern","팝아트·현대미술",87,55,"현대미술 큐레이터","npc_modern",62,50,"👑 ART MASTER 왕관"]];
+function show(x){$$(".screen").forEach(s=>s.classList.remove("on"));$("#"+x).classList.add("on")}$("#start").addEventListener("click",()=>{startMusic();show("choose")});$("#restart").addEventListener("click",()=>location.reload());
+const goBtn=$("#go"), nickInput=$("#nick");
+function enterGame(){
+  nick=(nickInput?.value||"").trim()||"ART HUNTER";
+  $("#pn").textContent=nick;
+  show("play");
+  world();
+  hud();
+  startMusic();
+}
+if(goBtn) goBtn.addEventListener("click",enterGame);
+if(nickInput) nickInput.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();enterGame()}});
+
+function hud(){$("#hp").textContent="❤️".repeat(hp)+"🖤".repeat(3-hp);$("#xp").textContent=xp;$("#bar").style.width=xp+"%";$("#lv").textContent=Math.min(5,Math.floor(xp/20)+1);$("#bag").textContent=items.length}
+function hero(){let h=$("#hero");h.style.left=pos.x+"%";h.style.top=pos.y+"%";h.src=`assets/${g}_${dir}${frame+1}.png`}
+function world(){scene="world";pos={x:14,y:72};$("#bg").src="assets/bg_world.jpg";$("#layer").innerHTML="";st.forEach((s,i)=>{let d=document.createElement("div");d.className="mapNode"+(i>cleared?" locked":"");d.style.left=s[2]+"%";d.style.top=s[3]+"%";d.textContent=(i+1)+". "+s[1];$("#layer").appendChild(d)});hero();detect()}
+function stage(i){scene=i;let s=st[i];$("#bg").src=`assets/bg_${s[0]}.jpg`;pos={x:18,y:76};$("#layer").innerHTML=`<img class="npc" src="assets/${s[5]}.png" style="left:${s[6]}%;top:${s[7]}%"><img class="quest" src="assets/quest.png" style="left:${s[6]}%;top:${s[7]-20}%"><div class="tag" style="left:${s[6]}%;top:${s[7]+11}%">${s[4]}</div><img class="obj" src="assets/sign.png" style="left:91%;top:76%;width:85px"><div class="tag" style="left:90%;top:88%">월드맵</div>`;hero();detect()}
+function move(k){let d=3.35;if(k==="ArrowLeft"||k.toLowerCase()==="a"){pos.x-=d;dir="left"}if(k==="ArrowRight"||k.toLowerCase()==="d"){pos.x+=d;dir="right"}if(k==="ArrowUp"||k.toLowerCase()==="w"){pos.y-=d;dir="up"}if(k==="ArrowDown"||k.toLowerCase()==="s"){pos.y+=d;dir="down"}pos.x=Math.max(4,Math.min(96,pos.x));pos.y=Math.max(17,Math.min(91,pos.y));frame=1-frame;hero();clearTimeout(walkT);walkT=setTimeout(()=>{frame=0;hero()},170);detect()}
+function detect(){near=null;if(scene==="world"){st.forEach((s,i)=>{if(i<=cleared&&Math.hypot(pos.x-s[2],pos.y-s[3])<11)near=["stage",i]})}else{let s=st[scene];if(Math.hypot(pos.x-s[6],pos.y-s[7])<12)near=["npc",scene];if(Math.hypot(pos.x-91,pos.y-76)<11)near=["exit"]}$("#prompt").style.display=near?"block":"none";if(near)$("#prompt").textContent=near[0]==="npc"?"SPACE · NPC와 대화":near[0]==="exit"?"SPACE · 월드맵":"SPACE · 지역 입장"}
+function act(){if(!near)return;if(near[0]==="stage")stage(near[1]);else if(near[0]==="npc")talk(near[1]);else world()}
+const held=new Set();let raf=null,last=0;
+function loop(t){if(!$("#play").classList.contains("on")){raf=null;return}if(t-last>75){let k=[...held].find(k=>["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","w","a","s","d","W","A","S","D"].includes(k));if(k){move(k);last=t}}raf=requestAnimationFrame(loop)}
+document.addEventListener("keydown",e=>{if(!$("#play").classList.contains("on"))return;if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"," ","w","a","s","d","W","A","S","D"].includes(e.key))e.preventDefault();if(e.key===" "){if(!e.repeat)act();return}held.add(e.key);if(!raf)raf=requestAnimationFrame(loop)});
+document.addEventListener("keyup",e=>held.delete(e.key));window.addEventListener("blur",()=>held.clear());
+$$(".controls button").forEach(b=>b.addEventListener("click",()=>b.dataset.k===" "?act():move(b.dataset.k)));
+const talks=[["어서 오게, 아트헌터여.","이집트인은 가장 완전한 정보를 보여주기 위해 여러 시점을 조합했지.","내 문제를 풀어 보겠나?"],["반갑구나. 나는 레오나르도 다빈치야.","《모나리자》가 시간의 균열 때문에 조각나 버렸어.","그림을 복원해 주겠니?"],["바로크와 로코코의 작품이 뒤섞였습니다.","극적인 장엄함과 우아한 장식성을 구별해 주세요.","미션을 시작하죠."],["빛은 매 순간 달라진단다.","《수련》을 보며 순간의 빛과 색을 표현한 방법을 생각해 보렴.","준비됐니?"],["마지막 시대입니다.","현대미술은 일상과 대중문화, 아이디어까지 예술로 확장했죠.","마지막 미션입니다."]];
+function talk(i){let n=0,s=st[i],d=document.createElement("div");d.className="dialog";d.innerHTML=`<b>${s[4]}</b><div id="dt">${talks[i][0]}</div><button id="dn" class="gold">다음 ▶</button>`;$("#game").appendChild(d);$("#dn").addEventListener("click",()=>{n++;if(n<talks[i].length)$("#dt").textContent=talks[i][n];else{d.remove();mission(i)}})}
+function mission(i){let c=document.createElement("div");c.className="mission panel";c.id="mission";
+if(i===0)c.innerHTML=`<h2>🏺 이집트 미션</h2><p>고대 이집트 인물 표현의 특징 3가지를 선택하세요.</p><div class="opts">${["다시점","영원성","스푸마토","정면성"].map(x=>`<button class="multi">${x}</button>`).join("")}</div><button id="check" class="gold">정답 확인</button>`;
+if(i===1)c.innerHTML=`<h2>🖼️ 모나리자 퍼즐</h2><p>흩어진 《모나리자》를 원래 모습으로 완성하세요.</p><div id="puzzle" class="puzzle"></div><button id="pcheck" class="gold">완성 확인</button>`;
+if(i===2)c.innerHTML=`<h2>🕯 바로크·로코코</h2><p>강한 명암, 극적인 움직임, 장엄함에 해당하는 시대는?</p><div class="opts"><button class="ans" data-ok="1">바로크</button><button class="ans">로코코</button></div>`;
+if(i===3)c.innerHTML=`<h2>🌻 인상주의</h2><p>모네의 《수련》처럼 순간의 빛과 색을 표현할 때 대표적으로 활용한 방법은?</p><div class="opts"><button class="ans">점묘법</button><button class="ans">스푸마토</button><button class="ans" data-ok="1">색채 분할(색채 병치)</button><button class="ans">명암법</button></div><small>※ 점묘법은 쇠라 등의 신인상주의에서 체계적으로 사용되었습니다.</small>`;
+if(i===4)c.innerHTML=`<h2>💥 FINAL BOSS</h2><p>현대미술에서 예술의 재료가 될 수 없는 것은?</p><div class="opts"><button class="ans">통조림</button><button class="ans">광고 이미지</button><button class="ans">아이디어 자체</button><button class="ans" data-ok="1">정답 없음</button></div>`;$("#game").appendChild(c);
+if(i===0){let sel=[];$$(".multi").forEach(b=>b.addEventListener("click",()=>{b.classList.toggle("sel");sel=$$(".multi.sel").map(x=>x.textContent)}));$("#check").addEventListener("click",()=>sel.length===3&&["다시점","영원성","정면성"].every(x=>sel.includes(x))?reward(i):wrong())}else if(i===1)puzzle(i);else $$(".ans").forEach(b=>b.addEventListener("click",()=>b.dataset.ok?reward(i):wrong()))}
+function wrong(){hp--;if(hp<=0)hp=3;hud();let t=document.createElement("div");t.className="toast";t.textContent=hp===3?"💡 HP 회복! 핵심 특징을 다시 떠올려 보세요.":"MISS! ❤️ -1";$("#game").appendChild(t);setTimeout(()=>t.remove(),1500)}
+function puzzle(i){let a=[4,0,7,2,8,1,5,3,6],sel=null,drag=null;function r(){let p=$("#puzzle");p.innerHTML="";a.forEach((v,j)=>{let b=document.createElement("button");b.className="tile"+(v===j?" good":"");b.draggable=true;b.style.backgroundPosition=`${(v%3)*50}% ${Math.floor(v/3)*50}%`;b.addEventListener("dragstart",()=>drag=j);b.addEventListener("dragover",e=>e.preventDefault());b.addEventListener("drop",e=>{e.preventDefault();if(drag===null)return;[a[drag],a[j]]=[a[j],a[drag]];drag=null;r()});b.addEventListener("click",()=>{if(sel===null){sel=j;b.classList.add("sel")}else{[a[sel],a[j]]=[a[j],a[sel]];sel=null;r()}});p.appendChild(b)})}r();$("#pcheck").addEventListener("click",()=>a.every((v,j)=>v===j)?reward(i):wrong())}
+function reward(i){$("#mission")?.remove();let s=st[i],c=document.createElement("div");c.className="mission panel reward";c.innerHTML=`<img id="ch" src="assets/chest_closed.png"><h1>MISSION CLEAR!</h1><button id="open" class="gold">보물상자 열기</button>`;$("#game").appendChild(c);$("#open").addEventListener("click",()=>{$("#ch").src="assets/chest_open.png";$("#ch").classList.add("spark");xp=Math.min(100,xp+20);if(!items.includes(s[8]))items.push(s[8]);cleared=Math.max(cleared,i+1);hud();setTimeout(()=>{c.innerHTML=`<img class="spark" src="assets/spark.png"><h2>${s[8]} 획득!</h2><h3>+20 EXP</h3><button id="back" class="gold">${i===4?"ART MASTER 엔딩":"월드맵으로"}</button>`;$("#back").addEventListener("click",()=>{c.remove();if(i===4){$("#final").textContent=items.join(" · ");show("end")}else world()})},650)})}
+})();
+</script>
+</body></html>
